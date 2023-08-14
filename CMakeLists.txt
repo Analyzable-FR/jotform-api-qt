@@ -21,9 +21,8 @@ target_link_libraries(jotform PRIVATE Qt6::Network)
 
 add_executable(test
     main.cpp
-    jotform.h
-    jotform.cpp
 )
+target_link_libraries(test PRIVATE jotform)
 target_link_libraries(test PRIVATE Qt6::Core)
 target_link_libraries(test PRIVATE Qt6::Network)
 
