@@ -1,0 +1,141 @@
+name: continous_build
+
+on:
+  push:
+    branches: [ master ]
+env:
+  QT_VERSION: 6.5.2
+
+jobs:
+  build_linux:
+      runs-on: ubuntu-20.04
+      steps:
+        - uses: actions/checkout@v2
+        - uses: actions/setup-python@v2
+          with:
+            python-version: '3.8'
+        - name: install_deps
+          run : |
+            pip install aqtinstall
+            sudo apt-get update
+            sudo apt-get upgrade
+            sudo apt-get install build-essential cmake libgl1-mesa-dev libpulse-dev
+            sudo apt-get install libxcb-*
+            sudo apt-get install libxkb-*
+            sudo apt-get install libcln-dev libqalculate-dev
+            sudo apt-get install libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev
+        - name: install_qt
+          run : |
+               python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ linux desktop ${{ env.QT_VERSION }}
+               echo ${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/gcc_64/bin/ >> $GITHUB_PATH
+        - name: build
+          run: |
+            mkdir build
+            cd build
+            mkdir release
+            cmake ../ -DCMAKE_INSTALL_PREFIX=./release
+            cmake --build .
+            cmake --install .
+        - name: upload_artefact
+          uses: actions/upload-artifact@v2
+          with:
+            name: linux
+            path: ./build/release
+
+  build_win_msvc:
+      runs-on: windows-latest
+      steps:
+        - uses: actions/checkout@v2
+        - uses: ilammy/msvc-dev-cmd@v1
+        - uses: actions/setup-python@v2
+          with:
+            python-version: '3.8'
+        - name: install_deps
+          run : |
+               pip install aqtinstall
+        - name: install_qt
+          run : |
+               python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ windows desktop ${{ env.QT_VERSION }} win64_msvc2019_64
+               echo "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/msvc2019_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        - name: build
+          run : |
+            mkdir build
+            cd build
+            mkdir release
+            cmake ../ -DCMAKE_INSTALL_PREFIX="release" -G "NMake Makefiles"
+            cmake --install .
+            cmake --build .
+            cmake --install .
+        - name: upload_artefact
+          uses: actions/upload-artifact@v2
+          with:
+            name: Windows_MSVC
+            path: ./build/release
+
+  build_win:
+      runs-on: windows-latest
+      steps:
+        - uses: actions/checkout@v2
+        - uses: actions/setup-python@v2
+          with:
+            python-version: '3.8'
+        - name: install_qt
+          run: |
+            choco uninstall mingw
+            pip install aqtinstall
+            python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ windows desktop ${{ env.QT_VERSION }} win64_mingw
+            python3 -m aqt install-tool -O ${{ github.workspace }}/Qt/ windows desktop tools_mingw90
+            echo "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/mingw_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+            echo "${{ github.workspace }}/Qt/Tools/mingw1120_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        - name: build
+          run: |
+            mkdir build
+            cd build
+            mkdir release
+            cmake ../ -DCMAKE_INSTALL_PREFIX="release" -G "MinGW Makefiles"
+            cmake --build .
+            cmake --install .
+        - name: upload_artefact
+          uses: actions/upload-artifact@v2
+          with:
+            name: Windows_MinGW
+            path: ./build/release
+
+  build_mac:
+      runs-on: macos-latest
+      steps:
+        - uses: actions/checkout@v2
+        - uses: actions/setup-python@v2
+          with:
+            python-version: '3.8'
+        - name: install_qt
+          run: |
+            pip install aqtinstall
+            python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ mac desktop ${{ env.QT_VERSION }}
+            echo ${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/macos/bin/ >> $GITHUB_PATH
+        - name: Set up Homebrew #https://github.com/Homebrew/homebrew-cask/issues/150323
+          id: set-up-homebrew
+          uses: Homebrew/actions/setup-homebrew@master
+        - name: install_deps
+          run: |
+            rm -f /usr/local/bin/2to3*
+            rm -f /usr/local/bin/idle3*
+            rm -f /usr/local/bin/pydoc3*
+            rm -f /usr/local/bin/python3*
+            rm -f /usr/local/opt/go/bin/go*
+            rm -f /usr/local/bin/go*
+            brew update -q -f
+            brew upgrade -q -f
+        - name: build
+          run: |
+              mkdir build
+              cd build
+              mkdir release
+              cmake ../ -DCMAKE_INSTALL_PREFIX=./release
+              cmake --build .
+              cmake --install .
+        - name: upload_artefact
+          uses: actions/upload-artifact@v2
+          with:
+            name: MacOS
+            path: ./build/release
