@@ -9,23 +9,24 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 COMPONENTS Core REQUIRED)
-find_package(Qt6 COMPONENTS Network REQUIRED)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Network)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Network REQUIRED)
 
 add_library(jotform SHARED
     jotform.h
     jotform.cpp
 )
-target_link_libraries(jotform PRIVATE Qt6::Core)
-target_link_libraries(jotform PRIVATE Qt6::Network)
+target_link_libraries(jotform PRIVATE Qt${QT_VERSION_MAJOR}::Core)
+target_link_libraries(jotform PRIVATE Qt${QT_VERSION_MAJOR}::Network)
 
 add_executable(test
     main.cpp
     jotform.h
     jotform.cpp
 )
-target_link_libraries(test PRIVATE Qt6::Core)
-target_link_libraries(test PRIVATE Qt6::Network)
+target_link_libraries(test PRIVATE Qt${QT_VERSION_MAJOR}::Core)
+target_link_libraries(test PRIVATE Qt${QT_VERSION_MAJOR}::Network)
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
@@ -42,6 +43,7 @@ set(public_headers
     jotform.h
 )
 # note that ${public_headers} has to be in quotes
+set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${public_headers}")
 
 include(GNUInstallDirs)
