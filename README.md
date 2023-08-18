@@ -4,7 +4,8 @@ A C++/Qt Client library for the [JotForm API](http://api.jotform.com/docs/).
 
 ## Installation
 
-This library requires Qt6 to be installed.
+This library requires Qt6 and/or Qt5 to be installed.
+Modify the `find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Network)` line to match your project to compile the shared library for Qt5, Qt6, or both.
 
 ### Unix-style
 
