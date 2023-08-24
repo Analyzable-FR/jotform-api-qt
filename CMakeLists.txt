@@ -28,6 +28,10 @@ add_executable(test
 target_link_libraries(test PRIVATE Qt${QT_VERSION_MAJOR}::Core)
 target_link_libraries(test PRIVATE Qt${QT_VERSION_MAJOR}::Network)
 
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set(CMAKE_INSTALL_RPATH “${ORIGIN}”)
+
 target_include_directories(${PROJECT_NAME}
     PRIVATE
         # where the library itself will look for its internal headers
