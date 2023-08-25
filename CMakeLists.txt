@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(jotform VERSION 0.1 LANGUAGES CXX)
+project(Qt${QT_VERSION_MAJOR}jotform VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -9,16 +9,17 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Network)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Network REQUIRED)
 
-add_library(jotform SHARED
+message(USING QT${QT_VERSION_MAJOR})
+
+add_library(${PROJECT_NAME} SHARED
     jotform.h
     jotform.cpp
 )
-target_link_libraries(jotform PRIVATE Qt${QT_VERSION_MAJOR}::Core)
-target_link_libraries(jotform PRIVATE Qt${QT_VERSION_MAJOR}::Network)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Core)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Network)
 
 add_executable(test
     main.cpp
@@ -51,7 +52,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${public_headers}")
 
 include(GNUInstallDirs)
-install(TARGETS jotform
+install(TARGETS ${PROJECT_NAME}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}

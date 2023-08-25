@@ -5,7 +5,6 @@ A C++/Qt Client library for the [JotForm API](http://api.jotform.com/docs/).
 ## Installation
 
 This library requires Qt6 and/or Qt5 to be installed.
-Modify the `find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Network)` line to match your project to compile the shared library for Qt5, Qt6, or both.
 
 ### Unix-style
 
@@ -13,7 +12,7 @@ Modify the `find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Network)` lin
 cd jotform-qt-api
 mkdir build
 cd build
-cmake ../
+cmake ../ -DQT_VERSION_MAJOR=6
 cmake --build .
 cmake --install .
 ```
@@ -22,7 +21,7 @@ After installation:
 
 - Include the header in your project.
 - Add the produced `.dll` or `.so` file and the relevant header to the path so your project can find it.
-- Include the library in your project's CMake using `target_link_libraries(executable PRIVATE jotform)`.
+- Include the library in your project's CMake using `target_link_libraries(executable PRIVATE Qt${QT_VERSION_MAJOR}jotform)`.
 
 ## Authentication
 

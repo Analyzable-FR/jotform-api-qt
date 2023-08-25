@@ -4,7 +4,8 @@ on:
   push:
     branches: [ master ]
 env:
-  QT_VERSION: 6.5.2
+  QT_VERSION_5: 5.15.2
+  QT_VERSION_6: 6.5.2
 
 jobs:
   build_linux:
@@ -26,14 +27,19 @@ jobs:
             sudo apt-get install libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev
         - name: install_qt
           run : |
-               python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ linux desktop ${{ env.QT_VERSION }}
-               echo ${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/gcc_64/bin/ >> $GITHUB_PATH
+               python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ linux desktop ${{ env.QT_VERSION_6 }}
+               echo ${{ github.workspace }}/Qt/${{ env.QT_VERSION_6 }}/gcc_64/bin/ >> $GITHUB_PATH
+               python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ linux desktop ${{ env.QT_VERSION_5 }}
+               echo ${{ github.workspace }}/Qt/${{ env.QT_VERSION_5 }}/gcc_64/bin/ >> $GITHUB_PATH
         - name: build
           run: |
             mkdir build
             cd build
             mkdir release
-            cmake ../ -DCMAKE_INSTALL_PREFIX=./release
+            cmake ../ -DCMAKE_INSTALL_PREFIX=./release -DQT_VERSION_MAJOR=5
+            cmake --build .
+            cmake --install .
+            cmake ../ -DCMAKE_INSTALL_PREFIX=./release -DQT_VERSION_MAJOR=6
             cmake --build .
             cmake --install .
         - name: upload_artefact
@@ -55,15 +61,19 @@ jobs:
                pip install aqtinstall
         - name: install_qt
           run : |
-               python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ windows desktop ${{ env.QT_VERSION }} win64_msvc2019_64
-               echo "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/msvc2019_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+               python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ windows desktop ${{ env.QT_VERSION_5 }} win64_msvc2019_64
+               echo "${{ github.workspace }}/Qt/${{ env.QT_VERSION_5 }}/msvc2019_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+               python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ windows desktop ${{ env.QT_VERSION_6 }} win64_msvc2019_64
+               echo "${{ github.workspace }}/Qt/${{ env.QT_VERSION_6 }}/msvc2019_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
         - name: build
           run : |
             mkdir build
             cd build
             mkdir release
-            cmake ../ -DCMAKE_INSTALL_PREFIX="release" -G "NMake Makefiles"
+            cmake ../ -DCMAKE_INSTALL_PREFIX="release" -G "NMake Makefiles" -DQT_VERSION_MAJOR=5
+            cmake --build .
             cmake --install .
+            cmake ../ -DCMAKE_INSTALL_PREFIX="release" -G "NMake Makefiles" -DQT_VERSION_MAJOR=6
             cmake --build .
             cmake --install .
         - name: upload_artefact
@@ -83,16 +93,21 @@ jobs:
           run: |
             choco uninstall mingw
             pip install aqtinstall
-            python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ windows desktop ${{ env.QT_VERSION }} win64_mingw
+            python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ windows desktop ${{ env.QT_VERSION_5 }} win64_mingw81
+            python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ windows desktop ${{ env.QT_VERSION_6 }} win64_mingw
             python3 -m aqt install-tool -O ${{ github.workspace }}/Qt/ windows desktop tools_mingw90
-            echo "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/mingw_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+            echo "${{ github.workspace }}/Qt/${{ env.QT_VERSION_5 }}/mingw81_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+            echo "${{ github.workspace }}/Qt/${{ env.QT_VERSION_6 }}/mingw_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
             echo "${{ github.workspace }}/Qt/Tools/mingw1120_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
         - name: build
           run: |
             mkdir build
             cd build
             mkdir release
-            cmake ../ -DCMAKE_INSTALL_PREFIX="release" -G "MinGW Makefiles"
+            cmake ../ -DCMAKE_INSTALL_PREFIX="release" -G "MinGW Makefiles" -DQT_VERSION_MAJOR=5
+            cmake --build .
+            cmake --install .
+            cmake ../ -DCMAKE_INSTALL_PREFIX="release" -G "MinGW Makefiles" -DQT_VERSION_MAJOR=6
             cmake --build .
             cmake --install .
         - name: upload_artefact
@@ -111,8 +126,10 @@ jobs:
         - name: install_qt
           run: |
             pip install aqtinstall
-            python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ mac desktop ${{ env.QT_VERSION }}
-            echo ${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/macos/bin/ >> $GITHUB_PATH
+            python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ mac desktop ${{ env.QT_VERSION_5 }}
+            echo ${{ github.workspace }}/Qt/${{ env.QT_VERSION_5 }}/clang_64/bin/ >> $GITHUB_PATH
+            python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ mac desktop ${{ env.QT_VERSION_6 }}
+            echo ${{ github.workspace }}/Qt/${{ env.QT_VERSION_6 }}/macos/bin/ >> $GITHUB_PATH
         - name: Set up Homebrew #https://github.com/Homebrew/homebrew-cask/issues/150323
           id: set-up-homebrew
           uses: Homebrew/actions/setup-homebrew@master
@@ -131,7 +148,10 @@ jobs:
               mkdir build
               cd build
               mkdir release
-              cmake ../ -DCMAKE_INSTALL_PREFIX=./release
+              cmake ../ -DCMAKE_INSTALL_PREFIX=./release -DQT_VERSION_MAJOR=5
+              cmake --build .
+              cmake --install .
+              cmake ../ -DCMAKE_INSTALL_PREFIX=./release -DQT_VERSION_MAJOR=6
               cmake --build .
               cmake --install .
         - name: upload_artefact
